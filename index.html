@@ -432,12 +432,15 @@
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect } = React;
+// ✅ FIX 1: useRef added to imports
+const { useState, useEffect, useRef } = React;
 
 const Portfolio = function() {
   var [theme, setTheme] = useState('light');
   var [activeSection, setActiveSection] = useState('home');
   var [videoModalOpen, setVideoModalOpen] = useState(false);
+  // ✅ FIX 2: videoRef created
+  var videoRef = useRef(null);
 
   useEffect(function() {
     document.documentElement.setAttribute('data-theme', theme);
@@ -452,9 +455,14 @@ const Portfolio = function() {
     document.body.style.overflow = 'hidden';
   };
 
+  // ✅ FIX 3: pause + reset video on close
   var closeVideoModal = function() {
     setVideoModalOpen(false);
     document.body.style.overflow = 'auto';
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
   };
 
   useEffect(function() {
@@ -685,7 +693,8 @@ const Portfolio = function() {
             <button className="close-modal" onClick={closeVideoModal}>×</button>
           </div>
           <div className="video-modal-body">
-            <video controls autoPlay>
+            {/* ✅ FIX 4: ref={videoRef} wired to video element */}
+            <video ref={videoRef} controls autoPlay>
               <source src="self_intro.mp4" type="video/mp4"/>
               <source src="self_intro.webm" type="video/webm"/>
               Your browser does not support the video tag.
